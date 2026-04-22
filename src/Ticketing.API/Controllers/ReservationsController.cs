@@ -18,7 +18,10 @@ namespace Ticketing.API.Controllers
         public async Task<IActionResult> CreateReservation(CreateReservationCommand command)
         {
             var result = await _mediator.Send(command);
-            return HandleCreatedResult(result, nameof(CreateReservation), new { id = result.GetValueOrThrow().ReservationId });
+            return result.Match(
+                success => HandleCreatedResult(result, nameof(CreateReservation), new { id = success.ReservationId }),
+                failure => HandleFailure(result)
+            );
         }
     }
 }

@@ -1,4 +1,3 @@
-
 using MediatR;
 using Ticketing.Application.Common;
 using Ticketing.Contracts.Screenings;

@@ -1,5 +1,8 @@
-public interface ISeatLockService
+namespace Ticketing.Application.Common.Interfaces
 {
-    Task<bool> TryLockSeatAsync(Guid screeningId, Guid seatId);
-    Task ReleaseSeatAsync(Guid screeningId, Guid seatId);
+    public interface ISeatLockService
+    {
+        Task ReleaseSeatAsync(Guid screeningId, Guid seatId, string lockValue);
+        Task<string?> TryLockSeatAsync(Guid screeningId, Guid seatId);
+    }
 }

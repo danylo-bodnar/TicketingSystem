@@ -31,7 +31,7 @@ namespace Ticketing.Domain.Screenings
             var seat = Seats.FirstOrDefault(x => x.SeatId == seatId);
 
             if (seat == null)
-                throw new Exception("Seat not found in screening");
+                throw new ScreeningSeatNotFoundException(seatId);
 
             return seat;
         }

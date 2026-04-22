@@ -5,7 +5,9 @@ namespace Ticketing.Domain.Common.ValueObjects
     public sealed class Money
     {
         public decimal Amount { get; }
-        public string Currency { get; }
+        public string Currency { get; } = null!;
+
+        private Money() { }
 
         public Money(decimal amount, string currency)
         {

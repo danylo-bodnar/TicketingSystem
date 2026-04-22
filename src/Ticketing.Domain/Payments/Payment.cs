@@ -13,9 +13,9 @@ namespace Ticketing.Domain.Payments
 
         private Payment() { }
 
-        public Payment(Guid id, Guid reservationId, Money amount)
+        public Payment(Guid reservationId, Money amount)
         {
-            Id = id;
+            Id = Guid.NewGuid();
             ReservationId = reservationId;
             Amount = amount;
             Status = PaymentStatus.Pending;

@@ -1,9 +1,9 @@
 using MediatR;
-using Ticketing.Application.Common;
 using Ticketing.Application.Common.Interfaces;
 using Ticketing.Contracts.Reservations;
 using Ticketing.Domain.Common.Exceptions;
 using Ticketing.Domain.Reservations;
+using Ticketing.Domain.Screenings.Exceptions;
 
 public class CreateReservationHandler : IRequestHandler<CreateReservationCommand, Result<CreateReservationResponse>>
 {
@@ -24,29 +24,59 @@ public class CreateReservationHandler : IRequestHandler<CreateReservationCommand
      CreateReservationCommand request,
      CancellationToken cancellationToken)
     {
-        var screening = await _screenings.GetByIdAsync(request.ScreeningId);
-        if (screening == null)
-            return Result<CreateReservationResponse>.Failure("Screening not found");
-
-        var reservedSeats = new List<Guid>();
-        foreach (var seatId in request.SeatIds)
+        if (request.SeatIds.Count == 0)
         {
-            var lockAcquired = await _seatLockService.TryLockSeatAsync(screening.Id, seatId);
-
-            if (!lockAcquired)
-                return Result<CreateReservationResponse>.Failure($"Seat {seatId} is already being reserved");
-
-            var seat = screening.GetSeat(seatId);
-            seat.Reserve();
-            reservedSeats.Add(seat.SeatId);
+            return Result<CreateReservationResponse>.Failure("No seats selected");
         }
 
-        var reservation = new Reservation(Guid.NewGuid(), screening.EventId, screening.Id, reservedSeats);
-        await _reservations.AddAsync(reservation);
+        var screening = await _screenings.GetByIdAsync(request.ScreeningId);
+        if (screening == null)
+        {
+            return Result<CreateReservationResponse>.Failure("Screening not found");
+        }
+
+        var lockedSeats = new Dictionary<Guid, string>();
+
+        foreach (var seatId in request.SeatIds)
+        {
+            var lockValue = await _seatLockService.TryLockSeatAsync(screening.Id, seatId);
+
+            if (lockValue == null)
+            {
+                foreach (var kv in lockedSeats)
+                {
+                    await _seatLockService.ReleaseSeatAsync(screening.Id, kv.Key, kv.Value);
+                }
+
+                return Result<CreateReservationResponse>.Failure("Seat is already being reserved");
+            }
+
+            lockedSeats[seatId] = lockValue;
+        }
 
         try
         {
+            foreach (var seatId in lockedSeats.Keys)
+            {
+                var seat = screening.GetSeat(seatId);
+                seat.Reserve();
+            }
+
+            var reservation = new Reservation(Guid.NewGuid(), screening.EventId, screening.Id, [.. lockedSeats.Keys]);
+
+            await _reservations.AddAsync(reservation);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return Result<CreateReservationResponse>.Success(new CreateReservationResponse(reservation.Id));
+        }
+        catch (ScreeningSeatNotFoundException)
+        {
+            return Result<CreateReservationResponse>
+                .Failure("One or more seats do not exist in this screening.");
+        }
+        catch (ScreeningSeatNotAvailableException)
+        {
+            return Result<CreateReservationResponse>.Failure("One or more seats are no longer available.");
         }
         catch (ConcurrencyException)
         {
@@ -54,12 +84,8 @@ public class CreateReservationHandler : IRequestHandler<CreateReservationCommand
         }
         finally
         {
-            foreach (var seatId in reservedSeats)
-            {
-                await _seatLockService.ReleaseSeatAsync(screening.Id, seatId);
-            }
+            foreach (var kv in lockedSeats)
+                await _seatLockService.ReleaseSeatAsync(screening.Id, kv.Key, kv.Value);
         }
-
-        return Result<CreateReservationResponse>.Success(new CreateReservationResponse(reservation.Id));
     }
 }

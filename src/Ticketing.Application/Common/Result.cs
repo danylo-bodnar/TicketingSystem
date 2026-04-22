@@ -1,5 +1,3 @@
-namespace Ticketing.Application.Common;
-
 public class Result<T>
 {
     public bool IsSuccess { get; }
@@ -14,11 +12,25 @@ public class Result<T>
     }
 
     public static Result<T> Success(T value)
-        => new Result<T>(true, value, null);
+        => new(true, value, null);
 
     public static Result<T> Failure(string error)
-        => new Result<T>(false, default, error);
+        => new(false, default, error);
 
     public T GetValueOrThrow()
-    => Value ?? throw new InvalidOperationException("Result has no value.");
+    {
+        if (!IsSuccess)
+            throw new InvalidOperationException(Error ?? "Result failed.");
+
+        return Value!;
+    }
+
+    public TResult Match<TResult>(
+        Func<T, TResult> onSuccess,
+        Func<string, TResult> onFailure)
+    {
+        return IsSuccess
+            ? onSuccess(Value!)
+            : onFailure(Error!);
+    }
 }

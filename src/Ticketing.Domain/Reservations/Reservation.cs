@@ -1,8 +1,9 @@
+using Ticketing.Domain.Events;
 using Ticketing.Domain.Seats.Exceptions;
 
 namespace Ticketing.Domain.Reservations
 {
-    public class Reservation
+    public class Reservation : AggregateRoot
     {
         public Guid Id { get; private set; }
         public Guid EventId { get; private set; }
@@ -28,6 +29,13 @@ namespace Ticketing.Domain.Reservations
             Status = ReservationStatus.Pending;
             CreatedAt = DateTime.UtcNow;
             ExpiredAt = CreatedAt.AddMinutes(5);
+
+            AddDomainEvent(new ReservationCreated(
+                        id,
+                        screeningId,
+                        seatIds,
+                        DateTime.UtcNow
+                    ));
         }
 
         public void Confirm()
@@ -38,6 +46,12 @@ namespace Ticketing.Domain.Reservations
             }
 
             Status = ReservationStatus.Confirmed;
+
+            AddDomainEvent(new ReservationConfirmed(
+                   Id,
+                   ScreeningId,
+                   DateTime.UtcNow
+               ));
         }
 
         public void Cancel()

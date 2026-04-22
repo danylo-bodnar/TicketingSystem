@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Ticketing.Application.Common;
 
 public class BaseApiController : ControllerBase
 {
@@ -9,6 +8,14 @@ public class BaseApiController : ControllerBase
             return BadRequest(result.Error);
 
         return Ok(result.GetValueOrThrow());
+    }
+
+    protected IActionResult HandleFailure<T>(Result<T> result)
+    {
+        if (result.IsSuccess)
+            return BadRequest("Expected failure but got success.");
+
+        return BadRequest(result.Error);
     }
 
     protected IActionResult HandleCreatedResult<T>(Result<T> result, string actionName, object routeValues)

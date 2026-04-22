@@ -1,5 +1,8 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Ticketing.Application.Common.Interfaces;
+using Ticketing.Application.Events;
+using Ticketing.Domain.Events;
 
 namespace Ticketing.Application
 {
@@ -9,6 +12,10 @@ namespace Ticketing.Application
         {
             services.AddMediatR(cfg =>
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
+            services.AddScoped<IEventDispatcher, EventDispatcher>();
+
+            services.AddScoped<IEventHandler<ReservationCreated>, ReservationCreatedHandler>();
 
             return services;
         }

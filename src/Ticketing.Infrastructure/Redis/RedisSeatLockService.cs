@@ -1,4 +1,5 @@
 using StackExchange.Redis;
+using Ticketing.Application.Common.Interfaces;
 
 public class RedisSeatLockService : ISeatLockService
 {
@@ -9,23 +10,36 @@ public class RedisSeatLockService : ISeatLockService
         _redis = redis;
     }
 
-    public async Task<bool> TryLockSeatAsync(Guid screeningId, Guid seatId)
+    public async Task<string?> TryLockSeatAsync(Guid screeningId, Guid seatId)
     {
         var db = _redis.GetDatabase();
         var key = $"seat:{screeningId}:{seatId}";
+        var value = Guid.NewGuid().ToString();
 
-        return await db.StringSetAsync(
+        var acquired = await db.StringSetAsync(
             key,
-            "locked",
-            TimeSpan.FromMinutes(5),
+            value,
+            TimeSpan.FromSeconds(10),
             When.NotExists);
+
+        return acquired ? value : null;
     }
 
-    public async Task ReleaseSeatAsync(Guid screeningId, Guid seatId)
+    public async Task ReleaseSeatAsync(Guid screeningId, Guid seatId, string lockValue)
     {
         var db = _redis.GetDatabase();
         var key = $"seat:{screeningId}:{seatId}";
 
-        await db.KeyDeleteAsync(key);
+        const string script = @"
+            if redis.call('GET', KEYS[1]) == ARGV[1] then
+                return redis.call('DEL', KEYS[1])
+            else
+                return 0
+            end";
+
+        await db.ScriptEvaluateAsync(
+            script,
+            new RedisKey[] { key },
+            new RedisValue[] { lockValue });
     }
 }
