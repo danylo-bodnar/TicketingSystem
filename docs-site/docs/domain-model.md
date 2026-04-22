@@ -1,0 +1,1 @@
+Command → DB → Outbox → Worker → (Dispatcher → Handlers)
