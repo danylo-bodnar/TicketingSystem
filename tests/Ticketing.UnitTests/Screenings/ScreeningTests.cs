@@ -36,7 +36,7 @@ namespace Ticketing.UnitTests.Screenings
             var existingSeat = new ScreeningSeat(Guid.NewGuid(), screeningId, Guid.NewGuid());
             var screening = new Screening(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow, new List<ScreeningSeat> { existingSeat });
 
-            Assert.Throws<Exception>(() => screening.GetSeat(Guid.NewGuid()));
+            Assert.Throws<ScreeningSeatNotFoundException>(() => screening.GetSeat(Guid.NewGuid()));
         }
     }
 }

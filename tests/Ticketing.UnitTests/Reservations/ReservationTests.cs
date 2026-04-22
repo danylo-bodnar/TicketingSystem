@@ -5,10 +5,20 @@ namespace Ticketing.UnitTests.Reservations
 {
     public class ReservationTests
     {
+        private Reservation CreatePendingReservation()
+        {
+            return new Reservation(
+                Guid.NewGuid(),                 // reservationId
+                Guid.NewGuid(),                 // eventId
+                Guid.NewGuid(),                 // screeningId
+                new List<Guid> { Guid.NewGuid() } // seatIds
+            );
+        }
+
         [Fact]
         public void Confirm_WhenPending_ShouldSetStatusConfirmed()
         {
-            var reservation = new Reservation(Guid.NewGuid(), Guid.NewGuid(), new List<Guid> { Guid.NewGuid() });
+            var reservation = CreatePendingReservation();
 
             reservation.Confirm();
 
@@ -18,8 +28,8 @@ namespace Ticketing.UnitTests.Reservations
         [Fact]
         public void Confirm_WhenNotPending_ShouldThrowException()
         {
-            var reservation = new Reservation(Guid.NewGuid(), Guid.NewGuid(), new List<Guid> { Guid.NewGuid() });
-            reservation.Confirm();
+            var reservation = CreatePendingReservation();
+            reservation.Confirm(); // move to Confirmed first
 
             Assert.Throws<InvalidReservationStateException>(() => reservation.Confirm());
         }
@@ -27,7 +37,7 @@ namespace Ticketing.UnitTests.Reservations
         [Fact]
         public void Cancel_WhenPending_ShouldSetStatusCancelled()
         {
-            var reservation = new Reservation(Guid.NewGuid(), Guid.NewGuid(), new List<Guid> { Guid.NewGuid() });
+            var reservation = CreatePendingReservation();
 
             reservation.Cancel();
 
@@ -37,7 +47,7 @@ namespace Ticketing.UnitTests.Reservations
         [Fact]
         public void Expire_WhenPending_ShouldSetStatusExpired()
         {
-            var reservation = new Reservation(Guid.NewGuid(), Guid.NewGuid(), new List<Guid> { Guid.NewGuid() });
+            var reservation = CreatePendingReservation();
 
             reservation.Expire();
 
