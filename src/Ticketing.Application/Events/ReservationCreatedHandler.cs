@@ -18,6 +18,12 @@ public class ReservationCreatedHandler : IEventHandler<ReservationCreated>
 
     public async Task HandleAsync(ReservationCreated @event)
     {
+        var exists = await _payments.ExistsByReservationId(@event.ReservationId);
+        if (exists)
+        {
+            return;
+        }
+
         var amount = new Money(@event.SeatIds.Count * 100, "USD");
 
         var payment = new Payment(@event.ReservationId, amount);

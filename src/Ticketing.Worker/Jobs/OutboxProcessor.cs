@@ -23,9 +23,10 @@ namespace Ticketing.Worker.Jobs
                 var dispatcher = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
 
                 var messages = await db.OutboxMessages
-                    .Where(x => x.ProcessedAt == null)
-                    .Take(20)
-                    .ToListAsync(ct);
+                          .Where(x => x.ProcessedAt == null && (x.NextRetryAt == null || x.NextRetryAt <= DateTime.UtcNow))
+                          .OrderBy(x => x.OccurredAt)
+                          .Take(20)
+                          .ToListAsync(ct);
 
                 foreach (var msg in messages)
                 {
@@ -37,14 +38,17 @@ namespace Ticketing.Worker.Jobs
                     }
                     catch (Exception ex)
                     {
-                        // IMPORTANT: do not mark as processed
+                        msg.RetryCount++;
+                        msg.NextRetryAt = DateTime.UtcNow.AddSeconds(5 * msg.RetryCount);
+
                         Console.WriteLine($"Failed to process {msg.Type}: {ex.Message}");
                     }
                 }
 
                 await db.SaveChangesAsync(ct);
 
-                await Task.Delay(1000, ct);
+                var delay = messages.Count == 0 ? 2000 : 200;
+                await Task.Delay(delay, ct);
             }
         }
     }
