@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ticketing.API\Ticketing.API.csproj" />
     <ProjectReference Include="..\..\src\Ticketing.Infrastructure\Ticketing.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Ticketing.Application\Ticketing.Application.csproj" />
   </ItemGroup>
 
 </Project>

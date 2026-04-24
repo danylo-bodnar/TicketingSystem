@@ -7,26 +7,40 @@ using Ticketing.IntegrationTests.Fixtures;
 public class TestDatabaseFixture : IDisposable
 {
     public CustomWebApplicationFactory Factory { get; }
-    public TicketingDbContext DbContext { get; }
+
+    public IServiceScopeFactory ScopeFactory =>
+        Factory.Services.GetRequiredService<IServiceScopeFactory>();
 
     public TestDatabaseFixture()
     {
         Factory = new CustomWebApplicationFactory();
-        var scope = Factory.Services.CreateScope();
-        DbContext = scope.ServiceProvider.GetRequiredService<TicketingDbContext>();
 
-        // Clean DB
-        DbContext.Database.ExecuteSqlRaw(
-            "TRUNCATE TABLE \"Reservations\", \"ScreeningSeats\", \"Screenings\", \"Seats\", \"Halls\" CASCADE;"
+        using var scope = Factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TicketingDbContext>();
+
+
+        db.Database.EnsureDeleted();
+        db.Database.Migrate();
+    }
+
+    public void ResetDatabase()
+    {
+        using var scope = ScopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TicketingDbContext>();
+
+        var tableNames = db.Model.GetEntityTypes()
+            .Select(t => t.GetTableName())
+            .Where(t => t != null)
+            .Distinct()
+            .Select(t => $"\"{t}\"")
+            .ToList();
+
+        db.Database.ExecuteSqlRaw(
+            $"TRUNCATE TABLE {string.Join(", ", tableNames)} CASCADE;"
         );
 
-        // Seed data using your centralized DataSeeder
-        DataSeeder.Seed(DbContext);
+        DataSeeder.Seed(db);
     }
 
-    public void Dispose()
-    {
-        DbContext.Dispose();
-        Factory.Dispose();
-    }
+    public void Dispose() => Factory.Dispose();
 }

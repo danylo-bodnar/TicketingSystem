@@ -24,12 +24,11 @@ namespace Ticketing.IntegrationTests.Fixtures
                     options.UseNpgsql("Host=localhost;Port=5433;Database=ticketing_test;Username=postgres;Password=postgres");
                 });
 
-                // Ensure database is created
-                var sp = services.BuildServiceProvider();
-                using var scope = sp.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<TicketingDbContext>();
-                db.Database.EnsureDeleted();
-                db.Database.Migrate();
+
+
+
+
+
             });
         }
     }
