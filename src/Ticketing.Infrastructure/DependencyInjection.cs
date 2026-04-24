@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Ticketing.Application.Common.Interfaces;
 using Ticketing.Infrastructure.Contexts;
+using Ticketing.Infrastructure.Outbox;
 using Ticketing.Infrastructure.Persistence;
 using Ticketing.Infrastructure.Repositories;
 
@@ -24,6 +25,7 @@ namespace Ticketing.Infrastructure
             services.AddScoped<IScreeningRepository, ScreeningRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IOutboxRepository, OutboxRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

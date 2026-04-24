@@ -1,55 +1,28 @@
-using Ticketing.Infrastructure.Contexts;
-using Microsoft.EntityFrameworkCore;
-using Ticketing.Application.Common.Interfaces;
+using Ticketing.Application.Outbox;
 
-namespace Ticketing.Worker.Jobs
+namespace Ticketing.Worker.Jobs;
+
+public class OutboxProcessor : BackgroundService
 {
-    public class OutboxProcessor : BackgroundService
+    private readonly IServiceScopeFactory _scopeFactory;
+
+    public OutboxProcessor(IServiceScopeFactory scopeFactory)
     {
-        private readonly IServiceScopeFactory _scopeFactory;
+        _scopeFactory = scopeFactory;
+    }
 
-        public OutboxProcessor(IServiceScopeFactory scopeFactory)
+    protected override async Task ExecuteAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
         {
-            _scopeFactory = scopeFactory;
-        }
+            using var scope = _scopeFactory.CreateScope();
 
-        protected override async Task ExecuteAsync(CancellationToken ct)
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                using var scope = _scopeFactory.CreateScope();
+            var processor = scope.ServiceProvider
+                .GetRequiredService<OutboxProcessorService>();
 
-                var db = scope.ServiceProvider.GetRequiredService<TicketingDbContext>();
-                var dispatcher = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
+            await processor.ProcessOnce(ct);
 
-                var messages = await db.OutboxMessages
-                          .Where(x => x.ProcessedAt == null && (x.NextRetryAt == null || x.NextRetryAt <= DateTime.UtcNow))
-                          .OrderBy(x => x.OccurredAt)
-                          .Take(20)
-                          .ToListAsync(ct);
-
-                foreach (var msg in messages)
-                {
-                    try
-                    {
-                        await dispatcher.DispatchAsync(msg.Type, msg.Payload);
-
-                        msg.ProcessedAt = DateTime.UtcNow;
-                    }
-                    catch (Exception ex)
-                    {
-                        msg.RetryCount++;
-                        msg.NextRetryAt = DateTime.UtcNow.AddSeconds(5 * msg.RetryCount);
-
-                        Console.WriteLine($"Failed to process {msg.Type}: {ex.Message}");
-                    }
-                }
-
-                await db.SaveChangesAsync(ct);
-
-                var delay = messages.Count == 0 ? 2000 : 200;
-                await Task.Delay(delay, ct);
-            }
+            await Task.Delay(200, ct);
         }
     }
 }

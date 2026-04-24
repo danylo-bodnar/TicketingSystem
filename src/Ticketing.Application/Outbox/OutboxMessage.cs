@@ -1,4 +1,4 @@
-namespace Ticketing.Infrastructure.Outbox
+namespace Ticketing.Application.Outbox
 {
     public class OutboxMessage
     {

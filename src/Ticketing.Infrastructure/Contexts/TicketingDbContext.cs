@@ -1,11 +1,11 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Ticketing.Application.Outbox;
 using Ticketing.Domain.Halls;
 using Ticketing.Domain.Payments;
 using Ticketing.Domain.Reservations;
 using Ticketing.Domain.Screenings;
 using Ticketing.Domain.Seats;
-using Ticketing.Infrastructure.Outbox;
 
 namespace Ticketing.Infrastructure.Contexts
 {
