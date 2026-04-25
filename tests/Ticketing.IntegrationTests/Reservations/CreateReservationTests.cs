@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Ticketing.Application.Events;
 using Ticketing.Domain.Events;
+using Ticketing.Infrastructure.Seed;
 
 public class CreateReservationTests : IntegrationTestBase
 {
@@ -106,14 +107,13 @@ public class CreateReservationTests : IntegrationTestBase
         var handler = GetService<IEventHandler<ReservationCreated>>();
 
         var evt = new ReservationCreated(
-            reservationId,
-            Guid.NewGuid(),
-            new List<Guid> { Guid.NewGuid() },
-            DateTime.UtcNow
-        );
+        reservationId,
+        DataSeeder.Screening1Id,
+        new List<Guid> { Guid.NewGuid() },
+        DateTime.UtcNow);
 
-        await handler.HandleAsync(evt);
-        await handler.HandleAsync(evt);
+        await handler.HandleAsync(evt, CancellationToken.None);
+        await handler.HandleAsync(evt, CancellationToken.None);
 
         using var db = CreateDbContext();
         var payments = await db.Payments

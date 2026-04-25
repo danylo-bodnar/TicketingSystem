@@ -23,12 +23,6 @@ namespace Ticketing.IntegrationTests.Fixtures
                 {
                     options.UseNpgsql("Host=localhost;Port=5433;Database=ticketing_test;Username=postgres;Password=postgres");
                 });
-
-
-
-
-
-
             });
         }
     }
