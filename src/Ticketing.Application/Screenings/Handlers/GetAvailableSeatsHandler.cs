@@ -27,6 +27,12 @@ public class GetAvailableSeatsHandler
         if (!seats.Any())
             return Result<List<SeatDto>>.Failure("No available seats or screening not found");
 
-        return Result<List<SeatDto>>.Success(seats);
+        return Result<List<SeatDto>>.Success(seats.Select(s => new SeatDto
+        {
+            SeatId = s.Id,
+            Row = s.Seat.Row,
+            Column = s.Seat.Column,
+            Status = s.Status,
+        }).ToList());
     }
 }

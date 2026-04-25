@@ -2,7 +2,6 @@ using Ticketing.Application.Common.Interfaces;
 using Ticketing.Domain.Screenings;
 using Ticketing.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
-using Ticketing.Contracts.DTOs;
 
 namespace Ticketing.Infrastructure.Repositories
 {
@@ -15,40 +14,30 @@ namespace Ticketing.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(Screening screening)
+        public async Task AddAsync(Screening screening, CancellationToken ct = default)
         {
-            await _context.Screenings.AddAsync(screening);
+            await _context.Screenings.AddAsync(screening, ct);
         }
 
-        public async Task<List<Screening>> GetAllAsync()
+        public async Task<List<Screening>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _context.Screenings.ToListAsync();
+            return await _context.Screenings.ToListAsync(ct);
         }
 
-        public async Task<Screening?> GetByIdAsync(Guid screeningId)
+        public async Task<Screening?> GetByIdAsync(Guid screeningId, CancellationToken ct = default)
         {
             return await _context.Screenings
                 .Include(s => s.Seats)
-                .FirstOrDefaultAsync(s => s.Id == screeningId);
+                .FirstOrDefaultAsync(s => s.Id == screeningId, ct);
         }
 
-        public async Task<List<SeatDto>> GetAvailableSeatsAsync(Guid screeningId)
+        public async Task<List<ScreeningSeat>> GetAvailableSeatsAsync(Guid screeningId, CancellationToken ct = default)
         {
             return await _context.ScreeningSeats
+                .Include(ss => ss.Seat)
                 .Where(ss => ss.ScreeningId == screeningId
                              && ss.Status == ScreeningSeatStatus.Available)
-                .Join(
-                    _context.Seats,
-                    ss => ss.SeatId,
-                    s => s.Id,
-                    (ss, s) => new SeatDto
-                    {
-                        SeatId = s.Id,
-                        Row = s.Row,
-                        Column = s.Column,
-                        Status = ss.Status
-                    })
-                .ToListAsync();
+                .ToListAsync(ct);
         }
     }
 }

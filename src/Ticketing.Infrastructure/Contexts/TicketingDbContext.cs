@@ -41,12 +41,16 @@ namespace Ticketing.Infrastructure.Contexts
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ScreeningSeat>()
-                .Property(ss => ss.Version)
-                .IsRowVersion(); ;
+                .HasOne(ss => ss.Seat)
+                .WithMany()
+                .HasForeignKey(ss => ss.SeatId);
 
             modelBuilder.Entity<Payment>(p =>
             {
                 p.OwnsOne(x => x.Amount);
+
+                p.HasIndex(x => x.ReservationId)
+                 .IsUnique();
             });
         }
 

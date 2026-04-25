@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Ticketing.Infrastructure.Contexts;
@@ -12,9 +13,11 @@ using Ticketing.Infrastructure.Contexts;
 namespace Ticketing.Infrastructure.Migrations
 {
     [DbContext(typeof(TicketingDbContext))]
-    partial class TicketingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260425173719_makePaymentsUnique")]
+    partial class makePaymentsUnique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,8 +170,6 @@ namespace Ticketing.Infrastructure.Migrations
 
                     b.HasIndex("ScreeningId");
 
-                    b.HasIndex("SeatId");
-
                     b.ToTable("ScreeningSeats");
                 });
 
@@ -221,14 +222,6 @@ namespace Ticketing.Infrastructure.Migrations
                         .HasForeignKey("ScreeningId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Ticketing.Domain.Seats.Seat", "Seat")
-                        .WithMany()
-                        .HasForeignKey("SeatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Seat");
                 });
 
             modelBuilder.Entity("Ticketing.Domain.Seats.Seat", b =>

@@ -40,5 +40,23 @@ namespace Ticketing.Domain.Screenings
         {
             return Seats.Where(x => x.Status == ScreeningSeatStatus.Available);
         }
+
+        public int GetAvailableSeatCount()
+        {
+            return Seats.Count(x => x.Status == ScreeningSeatStatus.Available);
+        }
+
+        public int GetTotalSeatCount()
+        {
+            return Seats.Count;
+        }
+
+        public decimal GetOccupancyRatio()
+        {
+            var total = GetTotalSeatCount();
+            var available = GetAvailableSeatCount();
+
+            return total == 0 ? 0 : (decimal)(total - available) / total;
+        }
     }
 }

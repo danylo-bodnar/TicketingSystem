@@ -1,18 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using Ticketing.Domain.Screenings.Exceptions;
+using Ticketing.Domain.Seats;
 
 namespace Ticketing.Domain.Screenings
 {
     public class ScreeningSeat
     {
         public Guid Id { get; private set; }
-
         public Guid ScreeningId { get; private set; }
-
         public Guid SeatId { get; private set; }
-
         public ScreeningSeatStatus Status { get; private set; }
-
+        public Seat Seat { get; private set; } = null!;
         [Timestamp]
         public uint Version { get; private set; }
 

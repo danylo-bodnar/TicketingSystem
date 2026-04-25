@@ -26,7 +26,7 @@ namespace Ticketing.Application.Outbox
             {
                 try
                 {
-                    await _dispatcher.DispatchAsync(msg.Type, msg.Payload);
+                    await _dispatcher.DispatchAsync(msg.Type, msg.Payload, ct);
 
                     msg.ProcessedAt = DateTime.UtcNow;
                 }

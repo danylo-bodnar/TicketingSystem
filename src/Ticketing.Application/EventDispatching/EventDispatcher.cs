@@ -12,7 +12,7 @@ public class EventDispatcher : IEventDispatcher
         _provider = provider;
     }
 
-    public async Task DispatchAsync(string typeName, string payload)
+    public async Task DispatchAsync(string typeName, string payload, CancellationToken ct)
     {
         var type = EventTypeResolver.Resolve(typeName);
 
@@ -32,7 +32,7 @@ public class EventDispatcher : IEventDispatcher
             if (method == null)
                 throw new Exception("Handler missing HandleAsync method");
 
-            await (Task)method.Invoke(handler, [@event])!;
+            await (Task)method.Invoke(handler, [@event, ct])!;
         }
     }
 }
