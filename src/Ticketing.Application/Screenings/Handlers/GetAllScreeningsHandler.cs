@@ -1,6 +1,4 @@
-
 using MediatR;
-using Ticketing.Application.Common;
 using Ticketing.Application.Common.Interfaces;
 using Ticketing.Application.Screenings.Queries;
 using Ticketing.Contracts.Screenings;

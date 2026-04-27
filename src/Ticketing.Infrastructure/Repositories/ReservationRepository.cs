@@ -14,14 +14,14 @@ namespace Ticketing.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(Reservation reservation)
+        public async Task AddAsync(Reservation reservation, CancellationToken ct = default)
         {
-            await _context.Reservations.AddAsync(reservation);
+            await _context.Reservations.AddAsync(reservation, ct);
         }
 
-        public async Task<Reservation?> GetByIdAsync(Guid reservationId)
+        public async Task<Reservation?> GetByIdAsync(Guid reservationId, CancellationToken ct = default)
         {
-            return await _context.Reservations.FirstOrDefaultAsync(r => r.Id == reservationId);
+            return await _context.Reservations.FirstOrDefaultAsync(r => r.Id == reservationId, ct);
         }
     }
 }

@@ -1,7 +1,6 @@
 using Ticketing.Application.Common.Interfaces;
 using Ticketing.Application.Events;
 using Ticketing.Domain.Common.Exceptions;
-using Ticketing.Domain.Common.ValueObjects;
 using Ticketing.Domain.Events;
 using Ticketing.Domain.Payments;
 using Ticketing.Domain.Screenings.Exceptions;

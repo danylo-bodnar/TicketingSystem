@@ -14,14 +14,14 @@ namespace Ticketing.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(Payment payment)
+        public async Task AddAsync(Payment payment, CancellationToken ct = default)
         {
-            await _context.Payments.AddAsync(payment);
+            await _context.Payments.AddAsync(payment, ct);
         }
 
-        public async Task<bool> ExistsByReservationId(Guid reservationId)
+        public async Task<Payment?> GetById(Guid paymentId, CancellationToken ct = default)
         {
-            return await _context.Payments.AnyAsync(p => p.ReservationId == reservationId);
+            return await _context.Payments.FirstOrDefaultAsync(p => p.Id == paymentId, ct);
         }
     }
 }

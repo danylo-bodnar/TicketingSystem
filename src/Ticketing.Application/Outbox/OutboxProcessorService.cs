@@ -30,10 +30,15 @@ namespace Ticketing.Application.Outbox
 
                     msg.ProcessedAt = DateTime.UtcNow;
                 }
-                catch
+                catch (Exception ex)
                 {
                     msg.RetryCount++;
-                    msg.NextRetryAt = DateTime.UtcNow.AddSeconds(5 * msg.RetryCount);
+                    msg.LastError = ex.Message;
+
+                    if (msg.RetryCount >= 5)
+                        msg.DeadLetteredAt = DateTime.UtcNow;
+                    else
+                        msg.NextRetryAt = DateTime.UtcNow.AddSeconds(5 * msg.RetryCount);
                 }
             }
 

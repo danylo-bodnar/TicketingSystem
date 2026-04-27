@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Ticketing.Application.Common.Interfaces;
+using Ticketing.Application.EventHandlers;
 using Ticketing.Application.Events;
 using Ticketing.Application.Outbox;
 using Ticketing.Domain.Events;
@@ -20,6 +21,8 @@ namespace Ticketing.Application
             services.AddScoped<IEventDispatcher, EventDispatcher>();
 
             services.AddScoped<IEventHandler<ReservationCreated>, ReservationCreatedHandler>();
+            services.AddScoped<IEventHandler<PaymentCompleted>, PaymentCompletedHandler>();
+            services.AddScoped<IEventHandler<ReservationConfirmed>, ReservationConfirmedHandler>();
 
             return services;
         }

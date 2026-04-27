@@ -1,9 +1,10 @@
 using Ticketing.Domain.Common.ValueObjects;
+using Ticketing.Domain.Events;
 using Ticketing.Domain.Payments.Exceptions;
 
 namespace Ticketing.Domain.Payments
 {
-    public class Payment
+    public class Payment : AggregateRoot
     {
         public Guid Id { get; private set; }
         public Guid ReservationId { get; private set; }
@@ -26,14 +27,19 @@ namespace Ticketing.Domain.Payments
         {
             if (Status != PaymentStatus.Pending)
             {
-                throw new InvalidPaymentStateException(Id, nameof(Complete));
+                throw new InvalidPaymentStateException(Id, Status, nameof(Complete));
             }
 
             Status = PaymentStatus.Completed;
+            AddDomainEvent(new PaymentCompleted(Id, ReservationId, Amount.Amount, Amount.Currency));
         }
 
         public void Fail()
         {
+            if (Status != PaymentStatus.Pending)
+            {
+                throw new InvalidPaymentStateException(Id, Status, nameof(Fail));
+            }
             Status = PaymentStatus.Failed;
         }
     }

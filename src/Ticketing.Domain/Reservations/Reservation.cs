@@ -47,11 +47,8 @@ namespace Ticketing.Domain.Reservations
 
             Status = ReservationStatus.Confirmed;
 
-            AddDomainEvent(new ReservationConfirmed(
-                   Id,
-                   ScreeningId,
-                   DateTime.UtcNow
-               ));
+            AddDomainEvent(new ReservationConfirmed(Id, ScreeningId, SeatIds, DateTime.UtcNow));
+
         }
 
         public void Cancel()
