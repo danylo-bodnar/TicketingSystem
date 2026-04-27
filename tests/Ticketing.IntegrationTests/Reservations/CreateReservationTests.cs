@@ -182,4 +182,77 @@ public class CreateReservationTests : IntegrationTestBase
 
         Assert.False(response.IsSuccessStatusCode);
     }
+    [Fact]
+    public async Task Reservation_FullFlow_Should_Confirm_Reservation_And_Sell_Seats()
+    {
+        // Arrange
+        using var db = CreateDbContext();
+        var screening = await db.Screenings
+            .Include(s => s.Seats)
+            .SingleAsync(s => s.Id == DataSeeder.Screening1Id);
+        var seatId = screening.Seats.First().SeatId;
+
+        // Step 1: Create reservation
+        var response = await Client.PostAsJsonAsync("/api/Reservations", new
+        {
+            screeningId = screening.Id,
+            seatIds = new[] { seatId }
+        });
+        response.EnsureSuccessStatusCode();
+
+        var reservationId = (await response.Content
+            .ReadFromJsonAsync<CreateReservationResponse>())!.ReservationId;
+
+        // Step 2: Run outbox → ReservationCreated → creates Payment
+        await RunOutboxProcessorOnce();
+
+        using var dbAfterPayment = CreateDbContext();
+        var payment = await dbAfterPayment.Payments
+            .SingleAsync(p => p.ReservationId == reservationId);
+        Assert.Equal(PaymentStatus.Pending, payment.Status);
+
+        // Step 3: Simulate payment webhook
+        var webhookResponse = await Client.PostAsJsonAsync("/api/payments/webhook", new
+        {
+            paymentId = payment.Id,
+            status = "completed"
+        });
+        webhookResponse.EnsureSuccessStatusCode();
+
+        // Step 4: Run outbox until seats are sold (end of chain)
+        await WaitForAsync(async () =>
+        {
+            using var db = CreateDbContext();
+            var seat = await db.Screenings
+                .Include(s => s.Seats)
+                .Where(s => s.Id == DataSeeder.Screening1Id)
+                .SelectMany(s => s.Seats)
+                .SingleOrDefaultAsync(s => s.SeatId == seatId);
+            return seat?.Status == ScreeningSeatStatus.Sold;
+        });
+
+        // Step 5: Verify final state
+        using var verifyDb = CreateDbContext();
+
+        var reservation = await verifyDb.Reservations
+            .SingleAsync(r => r.Id == reservationId);
+
+        var updatedSeat = await verifyDb.Screenings
+            .Include(s => s.Seats)
+            .Where(s => s.Id == DataSeeder.Screening1Id)
+            .SelectMany(s => s.Seats)
+            .SingleAsync(s => s.SeatId == seatId);
+
+        var completedPayment = await verifyDb.Payments
+            .SingleAsync(p => p.ReservationId == reservationId);
+
+        var deadLettered = await verifyDb.OutboxMessages
+            .AnyAsync(m => m.DeadLetteredAt != null);
+
+        Assert.Equal(ReservationStatus.Confirmed, reservation.Status);
+        Assert.Equal(ScreeningSeatStatus.Sold, updatedSeat.Status);
+        Assert.Equal(PaymentStatus.Completed, completedPayment.Status);
+        Assert.False(deadLettered, "No outbox messages should be dead-lettered");
+    }
+
 }

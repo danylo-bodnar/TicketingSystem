@@ -32,10 +32,21 @@ public abstract class IntegrationTestBase
         await processor.ProcessOnce(CancellationToken.None);
     }
 
-    protected T GetService<T>()
+    protected T GetService<T>() where T : notnull
     {
         var scope = ScopeFactory.CreateScope();
         return scope.ServiceProvider.GetRequiredService<T>();
     }
 
+    public async Task WaitForAsync(Func<Task<bool>> condition, int timeoutMs = 5000)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (await condition()) return;
+            await RunOutboxProcessorOnce();
+            await Task.Delay(100);
+        }
+        throw new TimeoutException("Condition not met within timeout — chain may be stuck");
+    }
 }
