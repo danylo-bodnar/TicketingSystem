@@ -20,7 +20,7 @@ Command Handler
 SaveChangesAsync()
     ├── persists aggregate state
     └── persists OutboxMessage        ← same transaction
-    
+
 Background Worker (every 200ms)
     │
     ▼
@@ -121,13 +121,13 @@ public async Task ProcessOnce(CancellationToken ct)
 
 Retry backoff schedule:
 
-| Attempt | Delay |
-|---------|-------|
-| 1 | 5s |
-| 2 | 10s |
-| 3 | 15s |
-| 4 | 20s |
-| 5 | Dead-lettered |
+| Attempt | Delay         |
+| ------- | ------------- |
+| 1       | 5s            |
+| 2       | 10s           |
+| 3       | 15s           |
+| 4       | 20s           |
+| 5       | Dead-lettered |
 
 ### 4. OutboxProcessor (Background Worker)
 
@@ -193,8 +193,6 @@ Each step is persisted and retried independently. If a step fails transiently, o
 ## Dead Letters
 
 Messages that fail 5 consecutive times are marked with `DeadLetteredAt` and stopped from retrying. These represent either a persistent infrastructure failure or a bug.
-
-Dead-lettered messages should be monitored and investigated. For events that are part of a business-critical flow (e.g. `ReservationConfirmed`), a compensating action may be needed — see [reservation-flow.md](./reservation-flow.md) for details.
 
 ---
 
