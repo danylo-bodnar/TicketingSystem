@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Ticketing.Application.Common.Interfaces;
+using Ticketing.Domain.Halls;
+using Ticketing.Domain.Payments;
 using Ticketing.Infrastructure.Contexts;
 using Ticketing.Infrastructure.Outbox;
 using Ticketing.Infrastructure.Persistence;

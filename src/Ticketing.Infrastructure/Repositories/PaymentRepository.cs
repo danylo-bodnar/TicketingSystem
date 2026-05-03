@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Ticketing.Application.Common.Interfaces;
 using Ticketing.Domain.Payments;
 using Ticketing.Infrastructure.Contexts;
 

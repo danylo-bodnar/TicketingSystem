@@ -3,6 +3,7 @@ using Ticketing.Application.Common;
 using Ticketing.Application.Common.Interfaces;
 using Ticketing.Application.Reservations.Queries;
 using Ticketing.Contracts.DTOs;
+using Ticketing.Domain.Halls;
 
 public class GetAvailableSeatsHandler
     : IRequestHandler<GetAvailableSeatsQuery, Result<List<SeatDto>>>

@@ -1,6 +1,4 @@
-using Ticketing.Domain.Halls;
-
-namespace Ticketing.Application.Common.Interfaces
+namespace Ticketing.Domain.Halls
 {
     public interface IHallRepository
     {

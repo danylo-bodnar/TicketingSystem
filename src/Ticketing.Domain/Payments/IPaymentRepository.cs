@@ -1,6 +1,4 @@
-using Ticketing.Domain.Payments;
-
-namespace Ticketing.Application.Common.Interfaces
+namespace Ticketing.Domain.Payments
 {
     public interface IPaymentRepository
     {
