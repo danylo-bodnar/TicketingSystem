@@ -1,7 +1,11 @@
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Ticketing.Application.Events;
+using Ticketing.Contracts.Reservations;
 using Ticketing.Domain.Events;
+using Ticketing.Domain.Payments;
+using Ticketing.Domain.Reservations;
+using Ticketing.Domain.Screenings;
 using Ticketing.Infrastructure.Seed;
 
 public class CreateReservationTests : IntegrationTestBase
