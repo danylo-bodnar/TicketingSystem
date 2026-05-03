@@ -29,17 +29,6 @@ export default defineConfig({
           { text: "Messaging", link: "/messaging" },
         ],
       },
-
-      {
-        text: "Core Flow",
-        items: [
-          {
-            text: "Reservation Flow",
-            link: "/reservation-flow",
-          },
-        ],
-      },
-
       {
         text: "System",
         items: [{ text: "Testing", link: "/testing" }],
