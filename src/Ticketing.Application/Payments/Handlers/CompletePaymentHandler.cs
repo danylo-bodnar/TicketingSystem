@@ -1,4 +1,5 @@
 using MediatR;
+using Ticketing.Application.Common.Interfaces;
 using Ticketing.Application.Payments.Commands;
 using Ticketing.Domain.Payments;
 
