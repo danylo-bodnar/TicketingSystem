@@ -1,0 +1,1 @@
+import{_ as e,c as t,o as r}from"./app.f79ee0bc.js";const l=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"redis-locking.md"}'),o={name:"redis-locking.md"};function a(s,c,n,i,d,p){return r(),t("div")}const m=e(o,[["render",a]]);export{l as __pageData,m as default};
