@@ -13,7 +13,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: docs-site/docs
+        working-directory: ./docs-site/docs
 
     steps:
       - uses: actions/checkout@v4
