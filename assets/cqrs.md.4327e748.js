@@ -1,0 +1,1 @@
+import{_ as e,c as t,o as r}from"./app.b38afc27.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"cqrs.md"}'),a={name:"cqrs.md"};function s(c,o,n,p,_,d){return r(),t("div")}const f=e(a,[["render",s]]);export{m as __pageData,f as default};
