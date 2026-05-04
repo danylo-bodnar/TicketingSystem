@@ -6,8 +6,6 @@ Domain events raised during a request (e.g. `ReservationCreated`, `PaymentComple
 
 The Outbox pattern solves this by persisting events **in the same database transaction** as the domain state change, then dispatching them asynchronously from a background worker.
 
----
-
 ## How It Works
 
 ```
@@ -31,8 +29,6 @@ OutboxProcessorService.ProcessOnce()
 ```
 
 The critical guarantee: **if the DB write succeeds, the event will eventually be dispatched.** The two are atomic.
-
----
 
 ## Components
 
@@ -171,8 +167,6 @@ public async Task DispatchAsync(string typeName, string payload, CancellationTok
 }
 ```
 
----
-
 ## Event Chain
 
 A single command can trigger a chain of events, each handled independently through the outbox:
@@ -188,13 +182,9 @@ CompletePaymentCommand
 
 Each step is persisted and retried independently. If a step fails transiently, only that step is retried — not the entire chain.
 
----
-
 ## Dead Letters
 
 Messages that fail 5 consecutive times are marked with `DeadLetteredAt` and stopped from retrying. These represent either a persistent infrastructure failure or a bug.
-
----
 
 ## Delivery Guarantee
 

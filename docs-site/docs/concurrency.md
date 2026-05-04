@@ -6,8 +6,6 @@ A ticketing system is a classic concurrency target — multiple users can attemp
 
 This system uses two complementary layers to prevent this.
 
----
-
 ## Layer 1 — Redis Distributed Lock (fail fast)
 
 When a reservation request arrives, before touching the database, each requested seat is locked in Redis:
@@ -60,8 +58,6 @@ Locks are always released in a `finally` block after the DB write completes.
 
 Redis is not a substitute for database-level consistency. A Redis node restart, network partition, or lock expiry during a slow DB write could theoretically allow two requests through simultaneously. This is where Layer 2 takes over.
 
----
-
 ## Layer 2 — Optimistic Concurrency (correctness guarantee)
 
 The `ScreeningSeat` entity carries an EF Core `[Timestamp]` concurrency token:
@@ -97,23 +93,19 @@ catch (ConcurrencyException)
 
 Any race condition that slips past the Redis layer. It is the hard consistency guarantee — no matter what happens at the application layer, the database will never allow two reservations for the same seat.
 
----
-
 ## Why Both Layers
 
-| | Redis Lock | Optimistic Concurrency |
-|---|---|---|
-| **Purpose** | Fail fast, reduce DB contention | Correctness guarantee |
-| **Where** | Application layer | Database layer |
-| **Cost of failure** | 409 returned immediately | `DbUpdateConcurrencyException` |
-| **Handles** | Concurrent requests | Redis misses, crashes, expiry races |
-| **Required for correctness** | No | Yes |
+|                              | Redis Lock                      | Optimistic Concurrency              |
+| ---------------------------- | ------------------------------- | ----------------------------------- |
+| **Purpose**                  | Fail fast, reduce DB contention | Correctness guarantee               |
+| **Where**                    | Application layer               | Database layer                      |
+| **Cost of failure**          | 409 returned immediately        | `DbUpdateConcurrencyException`      |
+| **Handles**                  | Concurrent requests             | Redis misses, crashes, expiry races |
+| **Required for correctness** | No                              | Yes                                 |
 
 Redis is a performance optimization — it prevents the database from being hammered under contention. Optimistic concurrency is the safety net that ensures correctness even if Redis fails.
 
 Removing Redis would still produce correct results, just with more DB load under concurrency. Removing the `[Timestamp]` token while keeping Redis would be unsafe.
-
----
 
 ## Concurrency Test
 

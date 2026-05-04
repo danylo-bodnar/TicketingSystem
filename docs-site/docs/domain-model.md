@@ -15,8 +15,6 @@ Reservation  ← AggregateRoot
 Payment      ← AggregateRoot
 ```
 
----
-
 ## Aggregates
 
 ### Reservation
@@ -102,8 +100,6 @@ public enum PaymentStatus
 }
 ```
 
----
-
 ## Entities
 
 ### Hall
@@ -116,8 +112,6 @@ Represents a physical venue. Owns a collection of `Seat` entities.
 - Must have at least one seat
 - No two seats can share the same row and column
 - A seat can only be added if its `HallId` matches the hall
-
----
 
 ### Seat
 
@@ -132,8 +126,6 @@ Represents a physical seat in a hall. Immutable after creation.
 
 Row cannot be empty, column must be greater than 0.
 
----
-
 ### Screening
 
 Represents a specific showing of an event in a hall at a given time. Owns a collection of `ScreeningSeat` entities.
@@ -143,8 +135,6 @@ Represents a specific showing of an event in a hall at a given time. Owns a coll
 - `GetAvailableSeats()` — seats with status `Available`
 - `GetAvailableSeatCount()` / `GetTotalSeatCount()`
 - `GetOccupancyRatio()` — fraction of seats that are reserved or sold
-
----
 
 ### ScreeningSeat
 
@@ -177,15 +167,11 @@ public enum ScreeningSeatStatus
 }
 ```
 
----
-
 ## Value Objects
 
 ### Money
 
 Wraps `Amount` (decimal) and `Currency` (string). Used on `Payment` to avoid primitive obsession on financial values.
-
----
 
 ## Domain Events
 
@@ -196,8 +182,6 @@ Events are raised inside aggregates via `AddDomainEvent()` and persisted to the 
 | `ReservationCreated`   | `Reservation` constructor | Payment creation         |
 | `ReservationConfirmed` | `Reservation.Confirm()`   | Seat marking as sold     |
 | `PaymentCompleted`     | `Payment.Complete()`      | Reservation confirmation |
-
----
 
 ## Invariants Summary
 

@@ -8,8 +8,6 @@ Redis distributed locks act as a fast gate: they reject concurrent reservation a
 
 See [concurrency.md](./concurrency.md) for how Redis locking fits into the full two-layer concurrency model.
 
----
-
 ## Lock Design
 
 Each seat in a screening gets its own lock key:
@@ -19,8 +17,6 @@ seat:{screeningId}:{seatId}
 ```
 
 This allows fine-grained locking per seat rather than locking the entire screening.
-
----
 
 ## Acquiring a Lock
 
@@ -45,8 +41,6 @@ Three properties make this safe:
 
 Returns the lock token on success, `null` if the seat is already locked.
 
----
-
 ## Releasing a Lock
 
 ```csharp
@@ -70,8 +64,6 @@ Release uses a Lua script executed atomically on the Redis server. The script:
 3. Deletes the key only if they match
 
 This guarantees that **only the lock owner can release the lock**. Without this check, a slow request whose TTL expired could delete a lock acquired by a different request, opening a window for a double-booking.
-
----
 
 ## All-or-Nothing Acquisition
 
@@ -98,8 +90,6 @@ This prevents partial locks — a request never holds some seats locked while fa
 
 Locks are always released in a `finally` block after the database write completes, regardless of success or failure.
 
----
-
 ## Failure Modes
 
 | Scenario                               | Behaviour                                                         |
@@ -108,8 +98,6 @@ Locks are always released in a `finally` block after the database write complete
 | Process crashes before release         | TTL expires after 10 seconds, seat becomes lockable again         |
 | Slow request whose TTL expired         | Lua script prevents it from deleting another request's lock       |
 | Redis unavailable                      | Exception propagates, reservation fails safely — no partial state |
-
----
 
 ## What Redis Does Not Guarantee
 

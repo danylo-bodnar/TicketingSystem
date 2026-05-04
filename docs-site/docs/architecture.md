@@ -19,8 +19,6 @@ The system follows a clean architecture approach with clear separation between d
 └─────────────────────────────────────────┘
 ```
 
----
-
 ## Projects
 
 ### Ticketing.Domain
@@ -30,8 +28,6 @@ The core of the system. Contains aggregates, entities, value objects, domain eve
 Key types: `Reservation`, `Payment`, `Screening`, `ScreeningSeat`, `Hall`, `Seat`, `Money`
 
 See [domain-model.md](./domain-model.md) for full details.
-
----
 
 ### Ticketing.Application
 
@@ -47,8 +43,6 @@ Key responsibilities:
 - Interface definitions: `IUnitOfWork`, `IOutboxRepository`, `IEventDispatcher`, `ISeatLockService`, repository interfaces
 
 See [cqrs.md](./cqrs.md) and [outbox-pattern.md](./outbox-pattern.md) for details.
-
----
 
 ### Ticketing.Infrastructure
 
@@ -67,8 +61,6 @@ Registered via `AddInfrastructure(configuration)` extension method.
 
 See [redis-locking.md](./redis-locking.md) for locking details.
 
----
-
 ### Ticketing.API
 
 The HTTP entry point. Hosts controllers and the request pipeline.
@@ -86,8 +78,6 @@ Registered services:
 Request → Controller → MediatR Command → Handler → Domain → SaveChangesAsync → Outbox
 ```
 
----
-
 ### Ticketing.Worker
 
 A background `IHost` that runs long-lived background services. Shares the same application and infrastructure registration as the API but has no HTTP pipeline.
@@ -103,13 +93,9 @@ Hosted services:
 
 See [outbox-pattern.md](./outbox-pattern.md) for outbox processing details.
 
----
-
 ### Ticketing.Contracts
 
 Shared request and response types used across the API boundary. Keeps DTOs out of the domain and application layers.
-
----
 
 ## Dependency Graph
 
@@ -123,8 +109,6 @@ Ticketing.Infrastructure ───► Ticketing.Application
 
 Ticketing.Contracts ◄─── Ticketing.API
 ```
-
----
 
 ## Key Design Decisions
 
