@@ -33,7 +33,10 @@ export default defineConfig({
       },
       {
         text: "System",
-        items: [{ text: "Testing", link: "/testing" }],
+        items: [
+          { text: "Logging", link: "/logging" },
+          { text: "Testing", link: "/testing" },
+        ],
       },
     ],
   },
