@@ -31,7 +31,13 @@ namespace Ticketing.Domain.Payments
             }
 
             Status = PaymentStatus.Completed;
-            AddDomainEvent(new PaymentCompleted(Id, ReservationId, Amount.Amount, Amount.Currency));
+            AddDomainEvent(new PaymentCompleted
+            {
+                PaymentId = Id,
+                ReservationId = ReservationId,
+                Amount = Amount.Amount,
+                Currency = Amount.Currency
+            });
         }
 
         public void Fail()

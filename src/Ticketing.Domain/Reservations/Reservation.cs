@@ -30,12 +30,14 @@ namespace Ticketing.Domain.Reservations
             CreatedAt = DateTime.UtcNow;
             ExpiredAt = CreatedAt.AddMinutes(5);
 
-            AddDomainEvent(new ReservationCreated(
-                        id,
-                        screeningId,
-                        seatIds,
-                        DateTime.UtcNow
-                    ));
+            AddDomainEvent(new ReservationCreated
+            {
+                ReservationId = id,
+                ScreeningId = screeningId,
+                SeatIds = seatIds,
+                CreatedAt = DateTime.UtcNow
+            }
+            );
         }
 
         public void Confirm()
@@ -47,8 +49,13 @@ namespace Ticketing.Domain.Reservations
 
             Status = ReservationStatus.Confirmed;
 
-            AddDomainEvent(new ReservationConfirmed(Id, ScreeningId, SeatIds, DateTime.UtcNow));
-
+            AddDomainEvent(new ReservationConfirmed
+            {
+                ReservationId = Id,
+                ScreeningId = ScreeningId,
+                SeatIds = SeatIds,
+                ConfirmedAt = DateTime.UtcNow
+            });
         }
 
         public void Cancel()
