@@ -2,6 +2,7 @@ using Ticketing.Application;
 using Ticketing.Infrastructure;
 using Serilog;
 using Serilog.Formatting.Json;
+using Ticketing.API.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddCors(options =>
 {
