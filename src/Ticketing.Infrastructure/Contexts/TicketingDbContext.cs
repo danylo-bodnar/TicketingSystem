@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Ticketing.Application.Common;
 using Ticketing.Application.Outbox;
 using Ticketing.Domain.Halls;
 using Ticketing.Domain.Payments;
@@ -11,8 +13,11 @@ namespace Ticketing.Infrastructure.Contexts
 {
     public class TicketingDbContext : DbContext
     {
-        public TicketingDbContext(DbContextOptions<TicketingDbContext> options) : base(options)
+        private readonly CorrelationContext _correlationContext;
+
+        public TicketingDbContext(DbContextOptions<TicketingDbContext> options, CorrelationContext correlationContext) : base(options)
         {
+            _correlationContext = correlationContext;
         }
 
         public DbSet<Hall> Halls => Set<Hall>();
@@ -68,7 +73,8 @@ namespace Ticketing.Infrastructure.Contexts
                     Id = Guid.NewGuid(),
                     Type = domainEvent.GetType().Name,
                     Payload = JsonSerializer.Serialize(domainEvent),
-                    OccurredAt = DateTime.UtcNow
+                    OccurredAt = DateTime.UtcNow,
+                    CorrelationId = _correlationContext.CorrelationId
                 });
             }
 

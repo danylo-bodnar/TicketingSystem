@@ -1,5 +1,7 @@
 using Ticketing.Application;
 using Ticketing.Infrastructure;
+using Serilog;
+using Serilog.Formatting.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Logging configuration
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithCorrelationId()
+    .WriteTo.Console(new JsonFormatter())
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
@@ -35,6 +46,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("MyCorsPolicy");
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.MapControllers();
 
 app.Run();

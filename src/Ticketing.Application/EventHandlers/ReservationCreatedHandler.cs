@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Ticketing.Application.Common.Interfaces;
 using Ticketing.Application.Events;
 using Ticketing.Domain.Common.Exceptions;
@@ -10,17 +11,26 @@ public class ReservationCreatedHandler : IEventHandler<ReservationCreated>
     private readonly IPaymentRepository _payments;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IScreeningRepository _screenings;
+    private readonly ILogger<ReservationCreatedHandler> _logger;
     private readonly PricingService _pricing = new();
 
-    public ReservationCreatedHandler(IPaymentRepository payments, IUnitOfWork unitOfWork, IScreeningRepository screenings)
+    public ReservationCreatedHandler(
+        IPaymentRepository payments,
+        IUnitOfWork unitOfWork,
+        IScreeningRepository screenings,
+        ILogger<ReservationCreatedHandler> logger)
     {
         _payments = payments;
         _unitOfWork = unitOfWork;
         _screenings = screenings;
+        _logger = logger;
     }
 
     public async Task HandleAsync(ReservationCreated @event, CancellationToken ct)
     {
+        _logger.LogInformation("Creating payment for reservation {ReservationId}, screening {ScreeningId}",
+            @event.ReservationId, @event.ScreeningId);
+
         var screening = await _screenings.GetByIdAsync(@event.ScreeningId, ct);
         if (screening == null)
             throw new ScreeningNotFoundException(@event.ScreeningId);
@@ -35,8 +45,13 @@ public class ReservationCreatedHandler : IEventHandler<ReservationCreated>
         try
         {
             await _unitOfWork.SaveChangesAsync(ct);
+
+            _logger.LogInformation("Payment created for reservation {ReservationId}, amount {Amount}",
+                @event.ReservationId, amount);
         }
-        catch (DuplicateEntityException) { }
+        catch (DuplicateEntityException)
+        {
+            _logger.LogWarning("Duplicate payment ignored for reservation {ReservationId}", @event.ReservationId);
+        }
     }
 }
-
