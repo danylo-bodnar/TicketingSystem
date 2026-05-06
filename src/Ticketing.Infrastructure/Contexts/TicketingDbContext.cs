@@ -13,11 +13,8 @@ namespace Ticketing.Infrastructure.Contexts
 {
     public class TicketingDbContext : DbContext
     {
-        private readonly CorrelationContext _correlationContext;
-
-        public TicketingDbContext(DbContextOptions<TicketingDbContext> options, CorrelationContext correlationContext) : base(options)
+        public TicketingDbContext(DbContextOptions<TicketingDbContext> options) : base(options)
         {
-            _correlationContext = correlationContext;
         }
 
         public DbSet<Hall> Halls => Set<Hall>();
@@ -61,6 +58,11 @@ namespace Ticketing.Infrastructure.Contexts
 
         public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
         {
+            var correlationId =
+                CorrelationContext.Current
+                ?? Activity.Current?.TraceId.ToString()
+                ?? Guid.NewGuid().ToString();
+
             var domainEvents = ChangeTracker
                 .Entries<AggregateRoot>()
                 .SelectMany(e => e.Entity.DomainEvents)
@@ -74,7 +76,7 @@ namespace Ticketing.Infrastructure.Contexts
                     Type = domainEvent.GetType().Name,
                     Payload = JsonSerializer.Serialize(domainEvent),
                     OccurredAt = DateTime.UtcNow,
-                    CorrelationId = _correlationContext.CorrelationId
+                    CorrelationId = correlationId
                 });
             }
 

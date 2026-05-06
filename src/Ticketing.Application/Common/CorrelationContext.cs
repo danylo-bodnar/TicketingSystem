@@ -1,7 +1,10 @@
 namespace Ticketing.Application.Common
 {
-    public class CorrelationContext
+    public static class CorrelationContext
     {
-        public string CorrelationId { get; set; } = Guid.NewGuid().ToString();
+        private static readonly AsyncLocal<string?> _correlationId = new();
+
+        public static string? Current => _correlationId.Value;
+        public static void Set(string id) => _correlationId.Value = id;
     }
 }

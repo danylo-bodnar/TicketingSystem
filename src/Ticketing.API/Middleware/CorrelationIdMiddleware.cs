@@ -9,13 +9,13 @@ public class CorrelationIdMiddleware
 
     public CorrelationIdMiddleware(RequestDelegate next) => _next = next;
 
-    public async Task Invoke(HttpContext context, CorrelationContext correlation)
+    public async Task Invoke(HttpContext context)
     {
         var correlationId = context.Request.Headers[Header].FirstOrDefault()
             ?? Activity.Current?.TraceId.ToString()
             ?? Guid.NewGuid().ToString();
 
-        correlation.CorrelationId = correlationId;
+        CorrelationContext.Set(correlationId);
 
         context.Response.Headers[Header] = correlationId;
 
