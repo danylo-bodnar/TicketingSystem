@@ -17,6 +17,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddCors(options =>
 {
@@ -30,7 +31,6 @@ builder.Services.AddCors(options =>
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .Enrich.WithCorrelationId()
     .WriteTo.Console(new JsonFormatter())
     .CreateLogger();
 
@@ -47,9 +47,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseCors("MyCorsPolicy");
 
+app.UseExceptionHandler();
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseCors("MyCorsPolicy");
 app.MapControllers();
 
 app.Run();
