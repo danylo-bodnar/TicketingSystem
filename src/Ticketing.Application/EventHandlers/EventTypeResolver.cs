@@ -11,11 +11,11 @@ namespace Ticketing.Application.Events
             if (_cache.TryGetValue(typeName, out var cached))
                 return cached;
 
-            var type = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(a => a.GetTypes())
-                .FirstOrDefault(t =>
-                    typeof(IEvent).IsAssignableFrom(t) &&
-                    t.Name == typeName);
+            var type = typeof(IEvent).Assembly
+            .GetTypes()
+            .FirstOrDefault(t =>
+                typeof(IEvent).IsAssignableFrom(t) &&
+                t.Name == typeName);
 
             if (type == null)
                 throw new InvalidOperationException($"Unknown event type: {typeName}");

@@ -9,6 +9,11 @@ public class EventDispatcher : IEventDispatcher
     private readonly IServiceProvider _provider;
     private readonly ILogger<EventDispatcher> _logger;
 
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public EventDispatcher(IServiceProvider provider, ILogger<EventDispatcher> logger)
     {
         _provider = provider;
@@ -18,7 +23,7 @@ public class EventDispatcher : IEventDispatcher
     public async Task DispatchAsync(string typeName, string payload, CancellationToken ct)
     {
         var type = EventTypeResolver.Resolve(typeName);
-        var @event = JsonSerializer.Deserialize(payload, type);
+        var @event = JsonSerializer.Deserialize(payload, type, _jsonOptions);
 
         if (@event == null)
         {
