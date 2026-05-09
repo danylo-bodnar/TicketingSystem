@@ -2,7 +2,7 @@ using Ticketing.Domain.Common.Exceptions;
 
 namespace Ticketing.Domain.Common.ValueObjects
 {
-    public sealed class Money
+    public sealed record Money
     {
         public decimal Amount { get; }
         public string Currency { get; } = null!;
