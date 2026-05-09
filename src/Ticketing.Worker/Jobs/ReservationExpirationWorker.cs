@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using Ticketing.Infrastructure.Contexts;
-using Ticketing.Domain.Reservations;
+using Ticketing.Application.Reservations.Services;
 
 public class ReservationExpirationWorker : BackgroundService
 {
@@ -11,40 +9,16 @@ public class ReservationExpirationWorker : BackgroundService
         _scopeFactory = scopeFactory;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!ct.IsCancellationRequested)
         {
             using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<TicketingDbContext>();
+            var service = scope.ServiceProvider
+                .GetRequiredService<ReservationExpirationService>();
 
-            var expiredReservations = await db.Reservations
-                .Where(r => r.Status == ReservationStatus.Pending &&
-                            r.ExpiredAt <= DateTime.UtcNow)
-                .ToListAsync(stoppingToken);
-
-            foreach (var reservation in expiredReservations)
-            {
-                reservation.Expire();
-
-                foreach (var seatId in reservation.SeatIds)
-                {
-                    var seats = await db.ScreeningSeats
-                    .Where(s =>
-                        s.ScreeningId == reservation.ScreeningId &&
-                        reservation.SeatIds.Contains(s.SeatId))
-                    .ToListAsync(stoppingToken);
-
-                    foreach (var seat in seats)
-                    {
-                        seat.Release();
-                    }
-                }
-            }
-
-            await db.SaveChangesAsync(stoppingToken);
-
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await service.ProcessOnce(ct);
+            await Task.Delay(TimeSpan.FromSeconds(30), ct);
         }
     }
 }

@@ -23,5 +23,13 @@ namespace Ticketing.Infrastructure.Repositories
         {
             return await _context.Reservations.FirstOrDefaultAsync(r => r.Id == reservationId, ct);
         }
+
+        public async Task<List<Reservation>> GetExpiredAsync(CancellationToken ct = default)
+        {
+            return await _context.Reservations
+                .Where(r => r.Status == ReservationStatus.Pending &&
+                            r.ExpiredAt <= DateTime.UtcNow)
+                .ToListAsync(ct);
+        }
     }
 }

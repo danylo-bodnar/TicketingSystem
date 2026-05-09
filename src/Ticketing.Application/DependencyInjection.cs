@@ -4,6 +4,7 @@ using Ticketing.Application.Common.Interfaces;
 using Ticketing.Application.EventHandlers;
 using Ticketing.Application.Events;
 using Ticketing.Application.Outbox;
+using Ticketing.Application.Reservations.Services;
 using Ticketing.Domain.Events;
 
 namespace Ticketing.Application
@@ -17,6 +18,7 @@ namespace Ticketing.Application
 
 
             services.AddScoped<OutboxProcessorService>();
+            services.AddScoped<ReservationExpirationService>();
 
             services.AddScoped<IEventDispatcher, EventDispatcher>();
 

@@ -110,11 +110,13 @@ public class CreateReservationTests : IntegrationTestBase
         var reservationId = Guid.NewGuid();
         var handler = GetService<IEventHandler<ReservationCreated>>();
 
-        var evt = new ReservationCreated(
-        reservationId,
-        DataSeeder.Screening1Id,
-        new List<Guid> { Guid.NewGuid() },
-        DateTime.UtcNow);
+        var evt = new ReservationCreated
+        {
+            ReservationId = reservationId,
+            ScreeningId = DataSeeder.Screening1Id,
+            SeatIds = new List<Guid> { Guid.NewGuid() },
+            CreatedAt = DateTime.UtcNow
+        };
 
         await handler.HandleAsync(evt, CancellationToken.None);
         await handler.HandleAsync(evt, CancellationToken.None);
@@ -259,4 +261,42 @@ public class CreateReservationTests : IntegrationTestBase
         Assert.False(deadLettered, "No outbox messages should be dead-lettered");
     }
 
+    [Fact]
+    public async Task ExpiredReservation_ShouldRelease_Seats()
+    {
+        // Arrange
+        using var db = CreateDbContext();
+        var screening = await db.Screenings
+            .Include(s => s.Seats)
+            .SingleAsync(s => s.Id == DataSeeder.Screening1Id);
+        var seatId = screening.Seats.First().SeatId;
+
+        // create reservation
+        var response = await Client.PostAsJsonAsync("/api/Reservations", new
+        {
+            screeningId = screening.Id,
+            seatIds = new[] { seatId }
+        });
+        response.EnsureSuccessStatusCode();
+
+        // manually expire it in DB
+        using var expireDb = CreateDbContext();
+        var reservation = await expireDb.Reservations.SingleAsync();
+        expireDb.Database.ExecuteSqlRaw(
+            "UPDATE \"Reservations\" SET \"ExpiredAt\" = {0} WHERE \"Id\" = {1}",
+            DateTime.UtcNow.AddMinutes(-1),
+            reservation.Id);
+
+        // Act
+        await RunExpirationWorkerOnce();
+
+        // Assert
+        using var verifyDb = CreateDbContext();
+        var updatedReservation = await verifyDb.Reservations.SingleAsync();
+        var updatedSeat = await verifyDb.ScreeningSeats
+            .SingleAsync(s => s.SeatId == seatId);
+
+        Assert.Equal(ReservationStatus.Expired, updatedReservation.Status);
+        Assert.Equal(ScreeningSeatStatus.Available, updatedSeat.Status);
+    }
 }
