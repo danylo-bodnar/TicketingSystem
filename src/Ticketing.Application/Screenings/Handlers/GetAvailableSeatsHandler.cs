@@ -30,7 +30,7 @@ public class GetAvailableSeatsHandler
 
         return Result<List<SeatDto>>.Success(seats.Select(s => new SeatDto
         {
-            SeatId = s.Id,
+            SeatId = s.SeatId,
             Row = s.Seat.Row,
             Column = s.Seat.Column,
             Status = s.Status,
