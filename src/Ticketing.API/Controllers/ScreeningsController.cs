@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Ticketing.Application.Reservations.Queries;
 using Ticketing.Application.Screenings.Queries;
 
 namespace Ticketing.API.Controllers
@@ -20,6 +19,14 @@ namespace Ticketing.API.Controllers
         public async Task<IActionResult> GetAvailableSeats(Guid id)
         {
             var result = await _mediator.Send(new GetAvailableSeatsQuery(id));
+            return HandleResult(result);
+        }
+
+        [HttpGet("{id}/seats")]
+        public async Task<IActionResult> GetSeats(Guid id)
+        {
+            var result = await _mediator.Send(new GetScreeningSeatsQuery(id));
+
             return HandleResult(result);
         }
 

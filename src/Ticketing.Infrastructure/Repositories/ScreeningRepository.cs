@@ -31,6 +31,14 @@ namespace Ticketing.Infrastructure.Repositories
                 .FirstOrDefaultAsync(s => s.Id == screeningId, ct);
         }
 
+        public async Task<Screening?> GetSeats(Guid screeningId, CancellationToken ct = default)
+        {
+            return await _context.Screenings
+                .Include(s => s.Seats)
+                    .ThenInclude(ss => ss.Seat)
+                .FirstOrDefaultAsync(s => s.Id == screeningId, ct);
+        }
+
         public async Task<List<ScreeningSeat>> GetAvailableSeatsAsync(Guid screeningId, CancellationToken ct = default)
         {
             return await _context.ScreeningSeats

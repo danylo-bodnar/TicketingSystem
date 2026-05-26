@@ -9,5 +9,6 @@ namespace Ticketing.Application.Common.Interfaces
         Task AddAsync(Screening screening, CancellationToken ct = default);
         Task<List<Screening>> GetAllAsync(CancellationToken ct = default);
         Task<List<ScreeningSeat>> GetAvailableSeatsAsync(Guid screeningId, CancellationToken ct = default);
+        Task<Screening?> GetSeats(Guid screeningId, CancellationToken ct = default);
     }
 }
