@@ -30,8 +30,6 @@ namespace Ticketing.Application.Reservations.Services
             {
                 try
                 {
-                    reservation.Expire();
-
                     var screening = await _screenings.GetByIdAsync(reservation.ScreeningId, ct);
                     if (screening == null)
                     {
@@ -39,6 +37,8 @@ namespace Ticketing.Application.Reservations.Services
                             reservation.ScreeningId, reservation.Id);
                         continue;
                     }
+
+                    reservation.Expire();
 
                     foreach (var seatId in reservation.SeatIds)
                         screening.GetSeat(seatId).Release();

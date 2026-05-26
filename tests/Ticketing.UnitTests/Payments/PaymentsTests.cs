@@ -9,7 +9,7 @@ namespace Ticketing.UnitTests.Payments
         [Fact]
         public void Complete_WhenPending_ShouldSetStatusCompleted()
         {
-            var payment = new Payment(Guid.NewGuid(), Guid.NewGuid(), new Money(100, "USD"));
+            var payment = new Payment(Guid.NewGuid(), new Money(100, "USD"));
 
             payment.Complete();
 
@@ -19,7 +19,7 @@ namespace Ticketing.UnitTests.Payments
         [Fact]
         public void Complete_WhenNotPending_ShouldThrowException()
         {
-            var payment = new Payment(Guid.NewGuid(), Guid.NewGuid(), new Money(100, "USD"));
+            var payment = new Payment(Guid.NewGuid(), new Money(100, "USD"));
             payment.Complete();
 
             Assert.Throws<InvalidPaymentStateException>(() => payment.Complete());

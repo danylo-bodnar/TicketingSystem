@@ -17,12 +17,13 @@ public class OutboxRepository : IOutboxRepository
 
     public async Task<List<OutboxMessage>> GetPendingAsync(int batchSize, CancellationToken ct)
     {
-        return await _db.OutboxMessages
-            .Where(x =>
-                x.ProcessedAt == null &&
-                (x.NextRetryAt == null || x.NextRetryAt <= DateTime.UtcNow))
-            .OrderBy(x => x.OccurredAt)
-            .Take(batchSize)
-            .ToListAsync(ct);
+            return await _db.OutboxMessages
+                .Where(x =>
+                    x.ProcessedAt == null &&
+                    x.DeadLetteredAt == null &&
+                    (x.NextRetryAt == null || x.NextRetryAt <= DateTime.UtcNow))
+                .OrderBy(x => x.OccurredAt)
+                .Take(batchSize)
+                .ToListAsync(ct);
     }
 }

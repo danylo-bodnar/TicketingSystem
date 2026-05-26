@@ -32,7 +32,7 @@ public class CreateReservationHandler : IRequestHandler<CreateReservationCommand
         CreateReservationCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.SeatIds.Count == 0)
+        if (request.SeatIds == null || request.SeatIds.Count == 0)
             return Result<CreateReservationResponse>.Failure("No seats selected");
 
         var screening = await _screenings.GetByIdAsync(request.ScreeningId);
