@@ -1,6 +1,6 @@
 using Ticketing.Domain.Common;
 
-namespace Ticketing.Domain.Seats.Exceptions
+namespace Ticketing.Domain.Reservations.Exceptions
 {
     public class InvalidReservationStateException : DomainException
     {

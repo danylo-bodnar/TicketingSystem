@@ -1,5 +1,5 @@
 using Ticketing.Domain.Events;
-using Ticketing.Domain.Seats.Exceptions;
+using Ticketing.Domain.Reservations.Exceptions;
 
 namespace Ticketing.Domain.Reservations
 {
@@ -60,7 +60,7 @@ namespace Ticketing.Domain.Reservations
 
         public void Cancel()
         {
-            if (Status == ReservationStatus.Confirmed)
+            if (Status != ReservationStatus.Pending)
             {
                 throw new InvalidReservationStateException(Id, nameof(Cancel));
             }
@@ -70,7 +70,7 @@ namespace Ticketing.Domain.Reservations
 
         public void Expire()
         {
-            if (Status == ReservationStatus.Confirmed)
+            if (Status != ReservationStatus.Pending)
             {
                 throw new InvalidReservationStateException(Id, nameof(Expire));
             }

@@ -1,4 +1,4 @@
-using Ticketing.Domain.Hall.Exceptions;
+using Ticketing.Domain.Halls.Exceptions;
 using Ticketing.Domain.Seats;
 
 namespace Ticketing.Domain.Halls

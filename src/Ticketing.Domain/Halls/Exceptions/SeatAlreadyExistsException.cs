@@ -1,6 +1,6 @@
 using Ticketing.Domain.Common;
 
-namespace Ticketing.Domain.Hall.Exceptions
+namespace Ticketing.Domain.Halls.Exceptions
 {
     public class SeatAlreadyExistsException : DomainException
     {

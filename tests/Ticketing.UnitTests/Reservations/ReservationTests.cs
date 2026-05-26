@@ -1,5 +1,5 @@
 using Ticketing.Domain.Reservations;
-using Ticketing.Domain.Seats.Exceptions;
+using Ticketing.Domain.Reservations.Exceptions;
 
 namespace Ticketing.UnitTests.Reservations
 {
