@@ -72,11 +72,15 @@ Set by middleware, injected into `DbContext` to stamp outbox messages. Scoped to
 
 ### Application layer — yes
 
-This is where business operations happen and where failures matter. Both command handlers and event handlers log here.
+This is where business operations happen and where failures matter. All handlers log here:
 
-### Query handlers — no
+- **MediatR pipeline** — logs every command/query start, completion, duration, and failure automatically
+- **Command/event handlers** — supplement with domain-specific details (entity IDs, reasons, counts)
+- **Outbox and event dispatcher** — message-level logging
 
-Queries are read-only and low-risk. Logging them adds noise without value.
+### Query handlers
+
+Previously opted out of logging. Now covered automatically by the [MediatR logging pipeline](#mediatr-logging-pipeline) — every query logs start time, duration, and success/failure without any handler changes.
 
 ### Infrastructure layer — no
 
@@ -106,6 +110,23 @@ The rule: **log decisions and outcomes, not mechanics.**
 | `Error`       | Unexpected failure — exception, dead-letter, deserialization failure |
 
 ## Logged Components
+
+### MediatR Logging Pipeline
+
+`LoggingBehavior<TRequest, TResponse>` wraps every command and query automatically:
+
+| Event | Level | Example |
+|---|---|---|
+| Request started | Debug | `Processing CreateReservationCommand` |
+| Completed successfully | Information | `Completed CreateReservationCommand in 45ms` |
+| Returned `Result.Failure` | Warning | `Completed GetAvailableSeatsQuery in 12ms — Failed: Screening not found` |
+| Unhandled exception | Error | `Exception in CreateReservationCommand after 30ms: ...` |
+
+The pipeline is a single `IPipelineBehavior` registered in `DependencyInjection.cs`. It is the **envelope** — provides timing, type name, and outcome. Handlers provide the **domain story** beneath it.
+
+```csharp
+services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+```
 
 ### CorrelationIdMiddleware
 
