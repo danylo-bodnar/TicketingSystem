@@ -9,6 +9,18 @@ namespace Ticketing.UnitTests.Halls
         private Seat CreateSeat(Guid hallId, string row, int column)
             => new Seat(Guid.NewGuid(), hallId, row, column);
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void CreateHall_ShouldThrow_WhenNameInvalid(string? name)
+        {
+            var hallId = Guid.NewGuid();
+
+            Assert.Throws<ArgumentException>(() =>
+                new Hall(hallId, name!, [CreateSeat(hallId, "A", 1)]));
+        }
+
         [Fact]
         public void CreateHall_ShouldCreateWithSeats()
         {

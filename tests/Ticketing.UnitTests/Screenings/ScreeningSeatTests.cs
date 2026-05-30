@@ -67,5 +67,15 @@ namespace Ticketing.UnitTests.Screenings
             var ex = Assert.Throws<ScreeningSeatAlreadySoldException>(() => seat.Release());
             Assert.Contains("already sold", ex.Message);
         }
+
+        [Fact]
+        public void Release_ShouldSetAvailable_WhenAlreadyAvailable()
+        {
+            var seat = new ScreeningSeat(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+            seat.Release();
+
+            Assert.Equal(ScreeningSeatStatus.Available, seat.Status);
+        }
     }
 }
