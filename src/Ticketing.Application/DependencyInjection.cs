@@ -1,5 +1,7 @@
 using System.Reflection;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Ticketing.Application.Behaviors;
 using Ticketing.Application.Common.Interfaces;
 using Ticketing.Application.EventHandlers;
 using Ticketing.Application.Events;
@@ -16,6 +18,7 @@ namespace Ticketing.Application
             services.AddMediatR(cfg =>
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
             services.AddScoped<OutboxProcessorService>();
             services.AddScoped<ReservationExpirationService>();
